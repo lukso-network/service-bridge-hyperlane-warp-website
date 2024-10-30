@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { ChainLogo } from '../../components/icons/ChainLogo';
 import { Modal } from '../../components/layout/Modal';
 
@@ -21,13 +23,15 @@ export function ChainSelectListModal({
     };
   };
 
+  const sortedChains = useMemo(() => chains.sort(), [chains]);
+
   return (
     <Modal isOpen={isOpen} title="Select Chain" close={close}>
       <div className="mt-2 flex flex-col space-y-1">
-        {chains.map((c) => (
+        {sortedChains.map((c) => (
           <button
             key={c}
-            className="py-1.5 px-2 text-sm flex items-center rounded hover:bg-gray-100 active:bg-gray-200 transition-all duration-200"
+            className="flex items-center rounded px-2 py-1.5 text-sm transition-all duration-200 hover:bg-gray-100 active:bg-gray-200"
             onClick={onSelectChain(c)}
           >
             <ChainLogo chainName={c} size={16} background={false} />

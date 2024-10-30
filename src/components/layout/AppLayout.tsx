@@ -1,14 +1,27 @@
 import Head from 'next/head';
-import Image from 'next/image';
 import { PropsWithChildren } from 'react';
 
-import { APP_NAME } from '../../consts/app';
-import Planet1 from '../../images/planets/planet-1.webp';
-import Planet2 from '../../images/planets/planet-2.webp';
+import { APP_NAME, BACKGROUND_COLOR, BACKGROUND_IMAGE } from '../../consts/app';
+import { useStore } from '../../features/store';
+import { SideBarMenu } from '../../features/wallet/SideBarMenu';
+import { WalletEnvSelectionModal } from '../../features/wallet/WalletEnvSelectionModal';
+import { useAccounts } from '../../features/wallet/hooks/multiProtocol';
 import { Footer } from '../nav/Footer';
 import { Header } from '../nav/Header';
 
 export function AppLayout({ children }: PropsWithChildren) {
+  const { readyAccounts } = useAccounts();
+  const numReady = readyAccounts.length;
+
+  const { showEnvSelectModal, setShowEnvSelectModal, isSideBarOpen, setIsSideBarOpen } = useStore(
+    (s) => ({
+      showEnvSelectModal: s.showEnvSelectModal,
+      setShowEnvSelectModal: s.setShowEnvSelectModal,
+      isSideBarOpen: s.isSideBarOpen,
+      setIsSideBarOpen: s.setIsSideBarOpen,
+    }),
+  );
+
   return (
     <>
       <Head>
@@ -19,29 +32,36 @@ export function AppLayout({ children }: PropsWithChildren) {
       <div
         style={styles.container}
         id="app-content"
-        className="relative flex flex-col justify-between h-full min-h-screen w-full min-w-screen bg-blue-500"
+        className="min-w-screen relative flex h-full min-h-screen w-full flex-col justify-between"
       >
-        <div className="hidden md:flex absolute left-[8%] top-[15%]">
-          <Image src={Planet1} alt="Planet 1" width={200} priority={false} quality={50}></Image>
-        </div>
-        <div className="hidden md:flex absolute right-[8%] bottom-1/4">
-          <Image src={Planet2} alt="Planet 2" width={220} priority={false} quality={50}></Image>
-        </div>
         <Header />
-        <div className="sm:px-4 mx-auto grow flex items-center max-w-screen-xl">
-          <main className="w-full flex-1 my-4 flex items-center justify-center">{children}</main>
+        <div className="mx-auto flex max-w-screen-xl grow items-center sm:px-4">
+          <main className="my-4 flex w-full flex-1 items-center justify-center">{children}</main>
         </div>
         <Footer />
       </div>
+
+      <WalletEnvSelectionModal
+        isOpen={showEnvSelectModal}
+        close={() => setShowEnvSelectModal(false)}
+      />
+      {numReady > 0 && (
+        <SideBarMenu
+          onClose={() => setIsSideBarOpen(false)}
+          isOpen={isSideBarOpen}
+          onConnectWallet={() => setShowEnvSelectModal(true)}
+        />
+      )}
     </>
   );
 }
 
 const styles = {
   container: {
-    backgroundImage: 'url(/backgrounds/lines-bg-top.svg)',
-    backgroundSize: '94vw',
+    backgroundColor: BACKGROUND_COLOR,
+    backgroundImage: BACKGROUND_IMAGE,
+    backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center 80px',
+    backgroundPosition: 'center',
   },
 };

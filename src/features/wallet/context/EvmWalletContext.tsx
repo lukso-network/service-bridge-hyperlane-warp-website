@@ -1,15 +1,15 @@
 import { RainbowKitProvider, connectorsForWallets, lightTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import {
-  argentWallet,
-  coinbaseWallet,
-  injectedWallet,
-  ledgerWallet,
-  metaMaskWallet,
-  omniWallet,
-  rainbowWallet,
-  trustWallet,
-  walletConnectWallet,
+    argentWallet,
+    coinbaseWallet,
+    injectedWallet,
+    ledgerWallet,
+    metaMaskWallet,
+    omniWallet,
+    rainbowWallet,
+    trustWallet,
+    walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 import { PropsWithChildren, useMemo, useState } from 'react';
 import { WagmiConfig, configureChains, createConfig } from 'wagmi';
@@ -79,7 +79,7 @@ export function EvmWalletContext({ children }: PropsWithChildren<unknown>) {
       <RainbowKitProvider
         chains={chains}
         theme={lightTheme({
-          accentColor: Color.primaryBlue,
+          accentColor: Color.primary,
           borderRadius: 'small',
           fontStack: 'system',
         })}

@@ -1,12 +1,15 @@
+import { SnapWalletAdapter } from '@drift-labs/snap-wallet-adapter';
 import { WalletAdapterNetwork, WalletError } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import {
-  LedgerWalletAdapter,
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-  TrustWalletAdapter,
+    BackpackWalletAdapter,
+    LedgerWalletAdapter,
+    PhantomWalletAdapter,
+    SalmonWalletAdapter,
+    SolflareWalletAdapter,
+    TrustWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { PropsWithChildren, useCallback, useMemo } from 'react';
@@ -16,12 +19,15 @@ import { logger } from '../../../utils/logger';
 
 export function SolanaWalletContext({ children }: PropsWithChildren<unknown>) {
   // TODO support multiple networks
-  const network = WalletAdapterNetwork.Devnet;
+  const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter(),
+      new BackpackWalletAdapter(),
+      new SalmonWalletAdapter(),
+      new SnapWalletAdapter(),
       new TrustWalletAdapter(),
       new LedgerWalletAdapter(),
     ],
