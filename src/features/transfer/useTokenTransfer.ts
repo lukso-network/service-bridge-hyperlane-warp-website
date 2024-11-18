@@ -10,10 +10,10 @@ import { logger } from '../../utils/logger';
 import { getChainDisplayName } from '../chains/utils';
 import { AppState, useStore } from '../store';
 import {
-    getAccountAddressForChain,
-    useAccounts,
-    useActiveChains,
-    useTransactionFns,
+  getAccountAddressForChain,
+  useAccounts,
+  useActiveChains,
+  useTransactionFns,
 } from '../wallet/hooks/multiProtocol';
 
 import { TransferContext, TransferFormValues, TransferStatus } from './types';

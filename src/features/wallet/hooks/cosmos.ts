@@ -12,11 +12,11 @@ import { getCosmosChainNames } from '../../chains/metadata';
 import { getChainMetadata } from '../../chains/utils';
 
 import {
-    AccountInfo,
-    ActiveChainInfo,
-    ChainAddress,
-    ChainTransactionFns,
-    WalletDetails,
+  AccountInfo,
+  ActiveChainInfo,
+  ChainAddress,
+  ChainTransactionFns,
+  WalletDetails,
 } from './types';
 
 export function useCosmosAccount(): AccountInfo {
