@@ -26,9 +26,9 @@ import { TokenSelectField } from '../tokens/TokenSelectField';
 import { useIsApproveRequired } from '../tokens/approval';
 import { useDestinationBalance, useOriginBalance } from '../tokens/balances';
 import {
-    getAccountAddressAndPubKey,
-    useAccountAddressForChain,
-    useAccounts,
+  getAccountAddressAndPubKey,
+  useAccountAddressForChain,
+  useAccounts,
 } from '../wallet/hooks/multiProtocol';
 import { AccountInfo } from '../wallet/hooks/types';
 

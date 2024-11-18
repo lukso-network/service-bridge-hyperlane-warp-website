@@ -17,10 +17,10 @@ import { getHypExplorerLink } from '../../utils/links';
 import { logger } from '../../utils/logger';
 import { useTimeout } from '../../utils/timeout';
 import {
-    getIconByTransferStatus,
-    getTransferStatusLabel,
-    isTransferFailed,
-    isTransferSent,
+  getIconByTransferStatus,
+  getTransferStatusLabel,
+  isTransferFailed,
+  isTransferSent,
 } from '../../utils/transfer';
 import { getChainDisplayName, hasPermissionlessChain } from '../chains/utils';
 import { useAccountForChain, useWalletDetails } from '../wallet/hooks/multiProtocol';

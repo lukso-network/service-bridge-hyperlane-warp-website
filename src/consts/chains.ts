@@ -1,8 +1,8 @@
 import {
-    eclipsemainnet,
-    eclipsemainnetAddresses,
-    solanamainnet,
-    solanamainnetAddresses,
+  eclipsemainnet,
+  eclipsemainnetAddresses,
+  solanamainnet,
+  solanamainnetAddresses,
 } from '@hyperlane-xyz/registry';
 import { ChainMap, ChainMetadata } from '@hyperlane-xyz/sdk';
 
