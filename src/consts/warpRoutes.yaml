@@ -3,20 +3,22 @@
 # The input here is typically the output of the Hyperlane CLI warp deploy command
 ---
 tokens:
-  - addressOrDenom: '0xe624E2a31ade421558AD818550E7FbDdD8e68340'
+  - addressOrDenom: '0xf7a739fdF8AAa1D913854248A452d31EBaC033D5'
     chainName: gnosis
+    collateralAddressOrDenom: '0xD14D167853237d3C9A61c976A2Be880C94e98A76'
     connections:
-      - token: ethereum|lukso|0xd70CabE1c992Cb9E25dc5d41a34c983b5c1E5F7e
+      - token: ethereum|lukso|0x683aaE8D21ee8Efd8757a620Bbb528E12bC9b03d
     decimals: 18
-    name: xDai
-    standard: EvmHypNative
-    symbol: xDai
-  - addressOrDenom: '0xd70CabE1c992Cb9E25dc5d41a34c983b5c1E5F7e'
+    name: MyToken
+    standard: EvmHypCollateral
+    symbol: MTK
+  - addressOrDenom: '0x683aaE8D21ee8Efd8757a620Bbb528E12bC9b03d'
     chainName: lukso
     connections:
-      - token: ethereum|gnosis|0xe624E2a31ade421558AD818550E7FbDdD8e68340
+      - token: ethereum|gnosis|0xf7a739fdF8AAa1D913854248A452d31EBaC033D5
     decimals: 18
-    name: xDai
-    standard: EvmHypNative
-    symbol: xDai
+    name: MyToken
+    standard: EvmHypSynthetic
+    symbol: MTK
+
 options: {}

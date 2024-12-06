@@ -9,6 +9,5 @@ export const Color = {
   gray: themeColors.gray[500],
   lightGray: themeColors.gray[200],
   primary: themeColors.primary[500],
-  accent: themeColors.accent[500],
   red: themeColors.red[500],
 } as const;

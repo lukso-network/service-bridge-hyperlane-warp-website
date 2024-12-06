@@ -8,14 +8,6 @@ import { logger } from '../../../utils/logger';
 import { getChainProtocol, tryGetChainProtocol } from '../../chains/utils';
 
 import {
-  useCosmosAccount,
-  useCosmosActiveChain,
-  useCosmosConnectFn,
-  useCosmosDisconnectFn,
-  useCosmosTransactionFns,
-  useCosmosWalletDetails,
-} from './cosmos';
-import {
   useEvmAccount,
   useEvmActiveChain,
   useEvmConnectFn,
@@ -23,14 +15,6 @@ import {
   useEvmTransactionFns,
   useEvmWalletDetails,
 } from './evm';
-import {
-  useSolAccount,
-  useSolActiveChain,
-  useSolConnectFn,
-  useSolDisconnectFn,
-  useSolTransactionFns,
-  useSolWalletDetails,
-} from './solana';
 import { AccountInfo, ActiveChainInfo, ChainTransactionFns, WalletDetails } from './types';
 
 export function useAccounts(): {
@@ -38,14 +22,9 @@ export function useAccounts(): {
   readyAccounts: Array<AccountInfo>;
 } {
   const evmAccountInfo = useEvmAccount();
-  const solAccountInfo = useSolAccount();
-  const cosmAccountInfo = useCosmosAccount();
 
   // Filtered ready accounts
-  const readyAccounts = useMemo(
-    () => [evmAccountInfo, solAccountInfo, cosmAccountInfo].filter((a) => a.isReady),
-    [evmAccountInfo, solAccountInfo, cosmAccountInfo],
-  );
+  const readyAccounts = useMemo(() => [evmAccountInfo].filter((a) => a.isReady), [evmAccountInfo]);
 
   // Check if any of the ready accounts are blacklisted
   const readyAddresses = readyAccounts
@@ -60,12 +39,20 @@ export function useAccounts(): {
     () => ({
       accounts: {
         [ProtocolType.Ethereum]: evmAccountInfo,
-        [ProtocolType.Sealevel]: solAccountInfo,
-        [ProtocolType.Cosmos]: cosmAccountInfo,
+        [ProtocolType.Cosmos]: {
+          protocol: ProtocolType.Cosmos,
+          addresses: [],
+          isReady: false,
+        },
+        [ProtocolType.Sealevel]: {
+          protocol: ProtocolType.Sealevel,
+          addresses: [],
+          isReady: false,
+        },
       },
       readyAccounts,
     }),
-    [evmAccountInfo, solAccountInfo, cosmAccountInfo, readyAccounts],
+    [evmAccountInfo, readyAccounts],
   );
 }
 
@@ -88,12 +75,9 @@ export function getAccountAddressForChain(
   if (!chainName || !accounts) return undefined;
   const protocol = getChainProtocol(chainName);
   const account = accounts[protocol];
-  if (protocol === ProtocolType.Cosmos) {
-    return account?.addresses.find((a) => a.chainName === chainName)?.address;
-  } else {
-    // Use first because only cosmos has the notion of per-chain addresses
-    return account?.addresses[0]?.address;
-  }
+
+  // Use first because only cosmos has the notion of per-chain addresses
+  return account?.addresses[0]?.address;
 }
 
 export function getAccountAddressAndPubKey(
@@ -109,38 +93,32 @@ export function getAccountAddressAndPubKey(
 
 export function useWalletDetails(): Record<ProtocolType, WalletDetails> {
   const evmWallet = useEvmWalletDetails();
-  const solWallet = useSolWalletDetails();
-  const cosmosWallet = useCosmosWalletDetails();
 
   return useMemo(
     () => ({
       [ProtocolType.Ethereum]: evmWallet,
-      [ProtocolType.Sealevel]: solWallet,
-      [ProtocolType.Cosmos]: cosmosWallet,
+      [ProtocolType.Cosmos]: {},
+      [ProtocolType.Sealevel]: {},
     }),
-    [evmWallet, solWallet, cosmosWallet],
+    [evmWallet],
   );
 }
 
 export function useConnectFns(): Record<ProtocolType, () => void> {
   const onConnectEthereum = useEvmConnectFn();
-  const onConnectSolana = useSolConnectFn();
-  const onConnectCosmos = useCosmosConnectFn();
 
   return useMemo(
     () => ({
       [ProtocolType.Ethereum]: onConnectEthereum,
-      [ProtocolType.Sealevel]: onConnectSolana,
-      [ProtocolType.Cosmos]: onConnectCosmos,
+      [ProtocolType.Cosmos]: () => {},
+      [ProtocolType.Sealevel]: () => {},
     }),
-    [onConnectEthereum, onConnectSolana, onConnectCosmos],
+    [onConnectEthereum],
   );
 }
 
 export function useDisconnectFns(): Record<ProtocolType, () => Promise<void>> {
   const disconnectEvm = useEvmDisconnectFn();
-  const disconnectSol = useSolDisconnectFn();
-  const disconnectCosmos = useCosmosDisconnectFn();
 
   const onClickDisconnect =
     (env: ProtocolType, disconnectFn?: () => Promise<void> | void) => async () => {
@@ -156,10 +134,10 @@ export function useDisconnectFns(): Record<ProtocolType, () => Promise<void>> {
   return useMemo(
     () => ({
       [ProtocolType.Ethereum]: onClickDisconnect(ProtocolType.Ethereum, disconnectEvm),
-      [ProtocolType.Sealevel]: onClickDisconnect(ProtocolType.Sealevel, disconnectSol),
-      [ProtocolType.Cosmos]: onClickDisconnect(ProtocolType.Cosmos, disconnectCosmos),
+      [ProtocolType.Cosmos]: async () => {},
+      [ProtocolType.Sealevel]: async () => {},
     }),
-    [disconnectEvm, disconnectSol, disconnectCosmos],
+    [disconnectEvm],
   );
 }
 
@@ -168,48 +146,32 @@ export function useActiveChains(): {
   readyChains: Array<ActiveChainInfo>;
 } {
   const evmChain = useEvmActiveChain();
-  const solChain = useSolActiveChain();
-  const cosmChain = useCosmosActiveChain();
 
-  const readyChains = useMemo(
-    () => [evmChain, solChain, cosmChain].filter((c) => !!c.chainDisplayName),
-    [evmChain, solChain, cosmChain],
-  );
+  const readyChains = useMemo(() => [evmChain].filter((c) => !!c.chainDisplayName), [evmChain]);
 
   return useMemo(
     () => ({
       chains: {
         [ProtocolType.Ethereum]: evmChain,
-        [ProtocolType.Sealevel]: solChain,
-        [ProtocolType.Cosmos]: cosmChain,
+        [ProtocolType.Cosmos]: {},
+        [ProtocolType.Sealevel]: {},
       },
       readyChains,
     }),
-    [evmChain, solChain, cosmChain, readyChains],
+    [evmChain, readyChains],
   );
 }
 
 export function useTransactionFns(): Record<ProtocolType, ChainTransactionFns> {
   const { switchNetwork: onSwitchEvmNetwork, sendTransaction: onSendEvmTx } =
     useEvmTransactionFns();
-  const { switchNetwork: onSwitchSolNetwork, sendTransaction: onSendSolTx } =
-    useSolTransactionFns();
-  const { switchNetwork: onSwitchCosmNetwork, sendTransaction: onSendCosmTx } =
-    useCosmosTransactionFns();
 
   return useMemo(
     () => ({
       [ProtocolType.Ethereum]: { sendTransaction: onSendEvmTx, switchNetwork: onSwitchEvmNetwork },
-      [ProtocolType.Sealevel]: { sendTransaction: onSendSolTx, switchNetwork: onSwitchSolNetwork },
-      [ProtocolType.Cosmos]: { sendTransaction: onSendCosmTx, switchNetwork: onSwitchCosmNetwork },
+      [ProtocolType.Cosmos]: { sendTransaction: async () => ({}) as any },
+      [ProtocolType.Sealevel]: { sendTransaction: async () => ({}) as any },
     }),
-    [
-      onSendEvmTx,
-      onSendSolTx,
-      onSwitchEvmNetwork,
-      onSwitchSolNetwork,
-      onSendCosmTx,
-      onSwitchCosmNetwork,
-    ],
+    [onSendEvmTx, onSwitchEvmNetwork],
   );
 }

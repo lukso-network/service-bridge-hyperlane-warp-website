@@ -197,7 +197,7 @@ export function TransfersDetailsModal({
           <Spinner />
           <div
             className={`mt-5 text-center text-sm ${
-              status === TransferStatus.Failed ? 'text-red-600' : 'text-gray-600'
+              status === (TransferStatus.Failed as any) ? 'text-red-600' : 'text-gray-600'
             }`}
           >
             {statusDescription}
