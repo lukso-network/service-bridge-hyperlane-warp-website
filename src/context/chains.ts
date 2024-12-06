@@ -8,7 +8,6 @@ import { config } from '../consts/config.ts';
 import { logger } from '../utils/logger';
 
 export async function assembleChainMetadata() {
-  // Chains must include a cosmos chain or CosmosKit throws errors
   const result = z.record(ChainMetadataSchema).safeParse({
     ...ChainsYaml,
     ...ChainsTS,
@@ -24,18 +23,6 @@ export async function assembleChainMetadata() {
     uri: config.registryUrl,
     proxyUrl: PROXY_DEPLOYED_URL,
   });
-  // let defaultChainMetadata = chainMetadata;
-  // if (config.registryUrl) {
-  //   logger.debug('Using custom registry', config.registryUrl);
-  //   defaultChainMetadata = await registry.getMetadata();
-  // } else {
-  //   logger.debug('Using default published registry');
-  //   // Note: this is an optional optimization to pre-fetch the content list
-  //   // and avoid repeated request from the chain logos that will use this info
-  //   await registry.listRegistryContent();
-  // }
-
-  // const chains = { ...defaultChainMetadata, ...customChainMetadata };
   const chains = { ...customChainMetadata };
 
   return { chains, registry };

@@ -1,8 +1,8 @@
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useQuery } from '@tanstack/react-query';
-import { getNetwork, sendTransaction, switchNetwork, waitForTransaction } from '@wagmi/core';
-import { useCallback, useMemo } from 'react';
-import { useAccount, useDisconnect, useNetwork } from 'wagmi';
+import { getAccount, waitForTransactionReceipt } from '@wagmi/core';
+import { useCallback, useMemo, useState } from 'react';
+import { useAccount, useDisconnect, useSendTransaction, useSwitchChain } from 'wagmi';
 
 import { ProviderType, TypedTransactionReceipt, WarpTypedTransaction } from '@hyperlane-xyz/sdk';
 import { ProtocolType, assert, sleep } from '@hyperlane-xyz/utils';
@@ -11,6 +11,8 @@ import { logger } from '../../../utils/logger';
 import { getChainMetadata, tryGetChainMetadata } from '../../chains/utils';
 import { ethers5TxToWagmiTx } from '../utils';
 
+import { getWagmiChainConfig } from '../../chains/metadata';
+import { getWagmiConfig } from '../context/EvmWalletContext';
 import { AccountInfo, ActiveChainInfo, ChainTransactionFns, WalletDetails } from './types';
 
 export function useEvmAccount(): AccountInfo {
@@ -72,7 +74,7 @@ export function useEvmDisconnectFn(): () => Promise<void> {
 }
 
 export function useEvmActiveChain(): ActiveChainInfo {
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
   return useMemo<ActiveChainInfo>(
     () => ({
       chainDisplayName: chain?.name,
@@ -83,12 +85,22 @@ export function useEvmActiveChain(): ActiveChainInfo {
 }
 
 export function useEvmTransactionFns(): ChainTransactionFns {
-  const onSwitchNetwork = useCallback(async (chainName: ChainName) => {
-    const chainId = getChainMetadata(chainName).chainId as number;
-    await switchNetwork({ chainId });
-    // Some wallets seem to require a brief pause after switch
-    await sleep(2000);
-  }, []);
+  const { switchChain } = useSwitchChain();
+  const { sendTransactionAsync } = useSendTransaction();
+
+  const [config] = useState(getWagmiConfig());
+  const account = getAccount(config);
+  const { chains } = getWagmiChainConfig();
+
+  const onSwitchNetwork = useCallback(
+    async (chainName: ChainName) => {
+      const chainId = getChainMetadata(chainName).chainId as number;
+      switchChain({ chainId });
+      // Some wallets seem to require a brief pause after switch
+      await sleep(2000);
+    },
+    [switchChain],
+  );
   // Note, this doesn't use wagmi's prepare + send pattern because we're potentially sending two transactions
   // The prepare hooks are recommended to use pre-click downtime to run async calls, but since the flow
   // may require two serial txs, the prepare hooks aren't useful and complicate hook architecture considerably.
@@ -112,26 +124,28 @@ export function useEvmTransactionFns(): ChainTransactionFns {
       // Since the network switching is not foolproof, we also force a network check here
       const chainId = getChainMetadata(chainName).chainId as number;
       logger.debug('Checking wallet current chain');
-      const latestNetwork = await getNetwork();
-      assert(
-        latestNetwork.chain?.id === chainId,
-        `Wallet not on chain ${chainName} (ChainMismatchError)`,
-      );
+      // const latestNetwork = await getNetwork();
+
+      const chain = chains.find((chain) => chain.id === account.chainId);
+      assert(chain?.id === chainId, `Wallet not on chain ${chainName} (ChainMismatchError)`);
 
       logger.debug(`Sending tx on chain ${chainName}`);
       const wagmiTx = ethers5TxToWagmiTx(tx.transaction);
-      const { hash } = await sendTransaction({
+
+      const hash = await sendTransactionAsync({
         chainId,
         ...wagmiTx,
       });
+
       const confirm = (): Promise<TypedTransactionReceipt> =>
-        waitForTransaction({ chainId, hash, confirmations: 1 }).then((r) => ({
+        waitForTransactionReceipt(config, { chainId, hash, confirmations: 1 }).then((r) => ({
           type: ProviderType.Viem,
           receipt: r,
         }));
+
       return { hash, confirm };
     },
-    [onSwitchNetwork],
+    [onSwitchNetwork, account.chainId, chains, config, sendTransactionAsync],
   );
 
   return { sendTransaction: onSendTx, switchNetwork: onSwitchNetwork };
